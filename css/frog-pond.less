@@ -1,0 +1,67 @@
+@import "client/lib/custom.bootstrap.import.less";
+@import "client/lib/custom.bootstrap.mixins.import.less";
+@import "mixins.less";
+
+// TRANSITION EVERYTIHNG
+* { transition: all 0.4s ease-in-out; }
+
+* { .user-select(none); }
+
+// BEGIN MAIN
+.game-board {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow: hidden;
+  background-color: @color-water;
+}
+
+.game-perspective {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  .perspective(2000px);
+  .transform(scaleX(0.8) translateY(15%)); // Compensate for transform
+
+  .game-tiles {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    .transform(rotateX(50deg));
+  }
+}
+
+.game-lily-wrapper {
+  display: block;
+  position: absolute;
+}
+
+.lily-square {
+  position: absolute;
+  width: 94%;
+  height: 94%;
+  margin: 3%;
+  background-color: @color-lily-default;
+  display: block;
+  border-radius: 35%;
+  cursor: move;
+  border: 2px solid fade(black, 30%);
+
+  &.hover {
+    .opacity(0.7);
+  }
+
+  &.with-occupant {
+    &[data-occupant-skin="1"] {
+      background-color: @color-lily-1;
+    }
+
+    &[data-occupant-skin="2"] {
+      background-color: @color-lily-2;
+    }
+  }
+}
