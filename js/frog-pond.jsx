@@ -3,20 +3,50 @@ Matches = new Mongo.Collection("matches");
 Models = {}
 Components = {}
 
-var matchStub = {
+generateTiles = function (width, height) {
+  var x, y
+    , tiles = {};
+
+  for (x = 0; x < width; x ++) {
+    for (y = 0; y < height; y ++) {
+      tiles[x + "," + y] = {};
+    }
+  }
+
+  tiles["0,0"].occupant = 1;
+  tiles[(width - 1) + "," + (height - 1)].occupant = 2;
+
+  return tiles;
+}
+
+matchStub = {
   _id: 1,
   // Starting Board
-  tiles: {
-    "0,0": { occupant: 1 },
-    "0,1": {},
-    "0,2": {},
-    "1,0": {},
-    "1,1": {},
-    "1,2": {},
-    "2,0": {},
-    "2,1": {},
-    "2,2": { occupant: 2 }
-  }
+  tiles: generateTiles(4, 4),
+
+  // Complex Boards
+  // tiles: generateTiles(7, 7)
+
+  // tiles: {
+  //   "0,0": { occupant: 1 },
+  //   "2,2": { occupant: 2 }
+  // }
+
+  // tiles: {
+  //   "0,0": { occupant: 1 },
+  //   "5,5": { occupant: 2 }
+  // }
+
+  // TODO: Center the board.
+  // tiles: {
+  //   "4,6": { occupant: 1 },
+  //   "9,3": { occupant: 2 }
+  // },
+
+  // tiles: {
+  //   "1,1": { occupant: 1 },
+  //   "3,3": { occupant: 2 }
+  // }
 }
 
 Models.Match = function (match) {
@@ -35,8 +65,27 @@ Models.Match.prototype.initializeTiles = function () {
   });
 }
 
+Models.Match.prototype.totalArea = function () {
+  var x = { min: 0, max: undefined }
+    , y = { min: 0, max: undefined };
+
+  this.tiles.forEach(function (tile) {
+    var tileX = tile.x + 1
+      , tileY = tile.y + 1;
+
+    if (x.min === undefined || tileX < x.min) x.min = tileX;
+    if (y.min === undefined || tileY < y.min) y.min = tileY;
+    if (x.max === undefined || tileX > x.max) x.max = tileX;
+    if (y.max === undefined || tileY > y.max) y.max = tileY;
+  });
+
+  return { width: x.max - x.min, height: y.max - y.min };
+}
+
 Models.GameTile = function (props) {
-  this.props = props;
+  this.x = props.x;
+  this.y = props.y;
+  this.occupant = props.occupant;
 }
 
 Models.GameTile.keyToCoordinates = function (key) {
@@ -45,7 +94,7 @@ Models.GameTile.keyToCoordinates = function (key) {
 }
 
 Models.GameTile.prototype.key = function () {
-  return this.props.x + "," + this.props.y;
+  return this.x + "," + this.y;
 }
 
 if (Meteor.isClient) {
@@ -61,7 +110,7 @@ if (Meteor.isClient) {
 
       render: function () {
         var coords = this.getCoordinates()
-          , occupantSkin = this.props.tile.props.occupant // TODO get skin from player's settings.
+          , occupantSkin = this.props.tile.occupant // TODO get skin from player's settings.
           , wrapperStyle = {
               left: (coords.x * this.props.size) + "px",
               top: (coords.y * this.props.size) + "px",
@@ -70,7 +119,7 @@ if (Meteor.isClient) {
             }
           , lilyClassSet = React.addons.classSet({
               "lily-square": true,
-              "with-occupant": !!this.props.tile.props.occupant,
+              "with-occupant": !!this.props.tile.occupant,
               hover: this.state.hover
             })
 
@@ -94,23 +143,22 @@ if (Meteor.isClient) {
       },
 
       getCoordinates: function () {
-        return { x: this.props.tile.props.x, y: this.props.tile.props.y };
+        return { x: this.props.tile.x, y: this.props.tile.y };
       }
     });
 
     Components.GameBoard = React.createClass({
       render: function () {
         var match = this.props.match
-          , countXTiles = 3
-          , countYTiles = 3
+          , totalArea = match.totalArea()
           , boardWidth = window.innerWidth
           , boardHeight = window.innerHeight
-          , maxTileWidth = boardWidth / countXTiles
-          , maxTileHeight = boardHeight / countYTiles
+          , maxTileWidth = boardWidth / totalArea.width
+          , maxTileHeight = boardHeight / totalArea.height
           , size = Math.min(maxTileWidth, maxTileHeight)
           , style = {
-              marginLeft: (size * countXTiles / -2) + "px",
-              marginTop: (size * countYTiles / -2) + "px"
+              marginLeft: (size * totalArea.width / -2) + "px",
+              marginTop: (size * totalArea.height / -2) + "px"
             }
           , gameTiles = match.tiles.map(function (tile) {
               return <Components.BoardTile tile={tile} size={size} key={tile.key()} />
@@ -136,6 +184,17 @@ if (Meteor.isClient) {
 
     Deps.autorun(render);
     $(window).resize(_.throttle(render, 100));
+
+    setTiles = function (tiles) {
+      matchStub.tiles = tiles;
+      render();
+    }
+
+    // To show instant re-render.
+    setBoardSize = function (width, height) {
+      setTiles(generateTiles(width, height));
+    }
+
   });
 }
 
