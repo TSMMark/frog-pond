@@ -114,7 +114,6 @@ Components.FacebookLogin = React.createClass({
 
     if (user) {
       var name = user.profile && user.profile.name;
-      console.log(user, user.profile, user.profile.name, name);
       return (
         <a>
           Signed in as {user.profile.name}
@@ -136,4 +135,29 @@ Components.FacebookLogin = React.createClass({
       throw error;
     });
   }
-})
+});
+
+Components.ExistingMatchesList = React.createClass({
+  render: function () {
+    var currentUser = this.props.currentUser
+      , matchesComponents = this.props.matches.map(function (match) {
+          var opponents = match.players.filter(function (player) {
+                return player._id != currentUser._id;
+              })
+            , opponentsNames = opponents.map(function (opponent) {
+                return opponent.profile.name;
+              });
+
+          return (
+            <Link to="playMatch" params={{matchId: match._id}}
+                  key={match._id} className="list-group-item">
+              vs {opponentsNames.join(", ")} - Make your move
+            </Link>);
+        });
+
+    return (
+      <div className="list-group">
+        {matchesComponents}
+      </div>);
+  }
+});

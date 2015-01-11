@@ -34,10 +34,28 @@ Views.NotFound = React.createClass({
 
 Views.Home = React.createClass({
   render: function () {
+    var currentUser = Meteor.user()
+      , matches = Collections.Matches.find().fetch()
+      , matchesByReadines = _.groupBy(matches, function (match) {
+          return match.currentPlayerId == currentUser._id ? "true" : "false";
+        })
+      , matchesReady = (matchesByReadines["true"] || [])
+      , matchesUnready = (matchesByReadines["false"] || [])
+      , countMatchesReady = matchesReady.length
+      , countMatchesUnready = matchesUnready.length;
+
     return (
       <Components.Container>
         <h1>Welcome to Sinky Frog</h1>
         <Link to="play" className="btn btn-primary btn-lg">Start a New Match</Link>
+        <h2>
+          It's your move in {countMatchesReady} of {matches.length} matches.
+        </h2>
+        <Components.ExistingMatchesList currentUser={currentUser}
+          matches={matchesReady}/>
+        <h2>Waiting on {countMatchesUnready} opponents.</h2>
+        <Components.ExistingMatchesList currentUser={currentUser}
+          matches={matchesUnready}/>
       </Components.Container>
     );
   }
@@ -45,22 +63,14 @@ Views.Home = React.createClass({
 
 Views.NewGame = React.createClass({
   listPlayers: function () {
-    var allPlayers = [{
-      _id: 1,
-      profile: {
-        name: "Mark Allen"
-      }
-    }, {
-      _id: 2,
-      profile: {
-        name: "Chloe Echikson"
-      }
-    }];
+    // var currentUserId = "ir6ZRhzSNtdc8GNAS"
+    var currentUser = Meteor.user()
+      , otherUsers = Collections.Users.find({_id: {$not: currentUser._id}});
 
-    return allPlayers.map(function (player) {
+    return otherUsers.map(function (player) {
       return (
         <li key={player._id} className="list-group-item">
-          <Components.NewGameButton player={player} currentPlayer={allPlayers[0]}/>
+          <Components.NewGameButton player={player} currentPlayer={currentUser}/>
         </li>);
     });
   },

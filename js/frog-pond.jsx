@@ -1,6 +1,7 @@
 if (Meteor.isClient) {
   Meteor.startup(function () {
-    Meteor.subscribe("matches");
+    Meteor.subscribe("matches", Meteor.userId());
+    Meteor.subscribe("users");
 
     var routes = (
       <Route name="app" path="/" handler={Views.App}>
@@ -18,23 +19,20 @@ if (Meteor.isClient) {
     }
 
     Deps.autorun(render);
-    $(window).resize(_.throttle(render, 800));
 
-    setTiles = function (tiles) {
-      matchStub.tiles = tiles;
-      render();
-    }
+    // TODO: does this work?
+    Collections.Matches.find().observe(render);
 
-    // To show instant re-render.
-    setBoardSize = function (width, height) {
-      setTiles(generateTiles(width, height));
-    }
-
+    $(window).resize(_.throttle(render, 600));
   });
 }
 
 if (Meteor.isServer) {
-  Meteor.publish("matches", function () {
-    return Collections.Matches.find();
+  Meteor.publish("matches", function (userId) {
+    return Collections.Matches.find({"playersIds": userId});
+  });
+
+  Meteor.publish("users", function () {
+    return Collections.Users.find();
   });
 }
