@@ -131,8 +131,9 @@ Components.FacebookLogin = React.createClass({
     Meteor.loginWithFacebook({
       requestPermissions: ['email']
     }, function (error) {
-      console.log("FacebookLogin Error", error);
-      throw error;
+      console.log("FacebookLogin", error);
+      if (error) throw error;
+      // render();
     });
   }
 });

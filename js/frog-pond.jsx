@@ -1,8 +1,5 @@
 if (Meteor.isClient) {
   Meteor.startup(function () {
-    Meteor.subscribe("matches", Meteor.userId());
-    Meteor.subscribe("users");
-
     var routes = (
       <Route name="app" path="/" handler={Views.App}>
         <Route name="play" handler={Views.NewGame}/>
@@ -11,7 +8,10 @@ if (Meteor.isClient) {
       </Route>
     );
 
-    var render = function () {
+    render = function () {
+      Meteor.subscribe("matches", Meteor.userId());
+      Meteor.subscribe("users");
+
       Router.run(routes, Router.HistoryLocation, function (Handler) {
         React.render(<Handler/>,
                      document.getElementById("main-app"));
@@ -19,9 +19,6 @@ if (Meteor.isClient) {
     }
 
     Deps.autorun(render);
-
-    // TODO: does this work?
-    Collections.Matches.find().observe(render);
 
     $(window).resize(_.throttle(render, 600));
   });
