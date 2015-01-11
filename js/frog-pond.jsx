@@ -1,5 +1,3 @@
-Matches = new Mongo.Collection("matches");
-
 Models = {}
 Components = {}
 
@@ -30,11 +28,6 @@ matchStub = {
   // tiles: {
   //   "0,0": { occupant: 1 },
   //   "2,2": { occupant: 2 }
-  // }
-
-  // tiles: {
-  //   "0,0": { occupant: 1 },
-  //   "5,5": { occupant: 2 }
   // }
 
   // TODO: Center the board.
@@ -100,6 +93,13 @@ Models.GameTile.prototype.key = function () {
 if (Meteor.isClient) {
   Meteor.subscribe("matches");
 
+  Router = ReactRouter;
+  Route = Router.Route;
+  NotFoundRoute = Router.NotFoundRoute;
+  DefaultRoute = Router.DefaultRoute;
+  Link = Router.Link;
+  RouteHandler = Router.RouteHandler;
+
   Meteor.startup(function () {
     Components.BoardTile = React.createClass({
       getInitialState: function () {
@@ -148,8 +148,12 @@ if (Meteor.isClient) {
     });
 
     Components.GameBoard = React.createClass({
+      getMatch: function () {
+        return new Models.Match(matchStub);
+      },
+
       render: function () {
-        var match = this.props.match
+        var match = this.getMatch()
           , totalArea = match.totalArea()
           , boardWidth = window.innerWidth
           , boardHeight = window.innerHeight
@@ -175,11 +179,84 @@ if (Meteor.isClient) {
       }
     });
 
-    var render = function() {
-      // var allMatches = Matches.find({}, {sort: {updatedAt: -1}});
-      // React.render(<GameBoard matches={allMatches} />, document.getElementById("main-app"));
-      var match = new Models.Match(matchStub);
-      React.render(<Components.GameBoard match={match} />, document.getElementById("main-app"));
+    var Container = React.createClass({
+      render: function () {
+        return (<div className="container">
+                  {this.props.children}
+                </div>);
+      }
+    });
+
+    var Navbar = React.createClass({
+      render: function () {
+        return (
+          <nav className="navbar navbar-default navbar-fixed-top">
+            <div className="container-fluid">
+
+              <div className="navbar-header">
+                <button type="button" className="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                  <span className="sr-only">Toggle navigation</span>
+                  <span className="icon-bar"></span>
+                  <span className="icon-bar"></span>
+                  <span className="icon-bar"></span>
+                </button>
+
+                <Link to="app" className="navbar-brand">
+                  Sinky Frog
+                </Link>
+              </div>
+
+              <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul className="nav navbar-nav">
+                  <li className="">
+                    <Link to="play">
+                      Play Now!
+                      <span className="sr-only">(current)</span>
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </nav>)
+      }
+    });
+
+    var App = React.createClass({
+      render: function () {
+        return (
+          <div>
+            <Navbar/>
+            <div id="main-content">
+              <RouteHandler/>
+            </div>
+          </div>
+        );
+      }
+    });
+
+    var Home = React.createClass({
+      render: function () {
+        return (
+          <Container>
+            <h1>Welcome to Sinky Frog</h1>
+            <Link to="play" className="btn btn-primary btn-lg">Play Now!</Link>
+          </Container>
+        );
+      }
+    });
+
+    var routes = (
+      <Route name="app" path="/" handler={App}>
+        <Route name="play" handler={Components.GameBoard}/>
+        <DefaultRoute handler={Home}/>
+      </Route>
+    );
+
+    var render = function () {
+      Router.run(routes, Router.HistoryLocation, function (Handler) {
+        React.render(<Handler/>,
+                     document.getElementById("main-app"));
+      });
     }
 
     Deps.autorun(render);

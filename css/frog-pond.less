@@ -5,25 +5,22 @@
 // TRANSITION EVERYTIHNG
 * { transition: all 0.4s ease-in-out; }
 
-* { .user-select(none); }
-
 // BEGIN MAIN
+#main-content {
+  .full-absolute();
+  top: @navbar-height;
+}
+
 .game-board {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  .full-absolute();
   overflow: hidden;
   background-color: @color-water;
+
+  * { .user-select(none); }
 }
 
 .game-perspective {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  .full-absolute();
   .perspective(2000px);
   .transform(scaleX(0.8) translateY(15%)); // Compensate for transform
 
