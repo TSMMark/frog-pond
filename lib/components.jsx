@@ -93,7 +93,7 @@ Components.NewGameButton = React.createClass({
     return (
       <button onClick={this.startNewMatch}
          className="btn btn-default">
-        Play against {this.props.player.name}
+        Play with {this.props.player.profile.name}
       </button>);
   },
 
@@ -107,3 +107,33 @@ Components.NewGameButton = React.createClass({
     this.transitionTo("playMatch", {matchId: matchId});
   }
 });
+
+Components.FacebookLogin = React.createClass({
+  render: function () {
+    var user = Meteor.user();
+
+    if (user) {
+      var name = user.profile && user.profile.name;
+      console.log(user, user.profile, user.profile.name, name);
+      return (
+        <a>
+          Signed in as {user.profile.name}
+        </a>);
+    }
+    else {
+      return (
+        <a onClick={this.signIn} href="#">
+          Sign In
+        </a>);
+    }
+  },
+
+  signIn: function () {
+    Meteor.loginWithFacebook({
+      requestPermissions: ['email']
+    }, function (error) {
+      console.log("FacebookLogin Error", error);
+      throw error;
+    });
+  }
+})

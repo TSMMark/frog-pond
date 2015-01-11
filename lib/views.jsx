@@ -37,7 +37,7 @@ Views.Home = React.createClass({
     return (
       <Components.Container>
         <h1>Welcome to Sinky Frog</h1>
-        <Link to="play" className="btn btn-primary btn-lg">Play Now!</Link>
+        <Link to="play" className="btn btn-primary btn-lg">Start a New Match</Link>
       </Components.Container>
     );
   }
@@ -47,25 +47,31 @@ Views.NewGame = React.createClass({
   listPlayers: function () {
     var allPlayers = [{
       _id: 1,
-      name: "Mark"
-    },{
+      profile: {
+        name: "Mark Allen"
+      }
+    }, {
       _id: 2,
-      name: "Chloe"
+      profile: {
+        name: "Chloe Echikson"
+      }
     }];
 
     return allPlayers.map(function (player) {
       return (
-        <div key={player._id}>
+        <li key={player._id} className="list-group-item">
           <Components.NewGameButton player={player} currentPlayer={allPlayers[0]}/>
-        </div>);
+        </li>);
     });
   },
 
   render: function () {
     return (
       <Components.Container>
-        <h1>Start a new Game</h1>
-        {this.listPlayers()}
+        <h1>Start a new match with...</h1>
+        <ul className="list-group">
+          {this.listPlayers()}
+        </ul>
       </Components.Container>
     );
   }

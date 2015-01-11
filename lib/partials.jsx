@@ -20,16 +20,25 @@ Partials.Navbar = React.createClass({
           </div>
 
           <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-            <ul className="nav navbar-nav">
-              <li className="">
-                <Link to="play">
-                  Play Now!
-                  <span className="sr-only">(current)</span>
+            <ul className="nav navbar-nav navbar-left">
+              <li>
+                <Link to="app">
+                  Existing Matches
                 </Link>
+              </li>
+              <li>
+                <Link to="play">
+                  + New Match
+                </Link>
+              </li>
+            </ul>
+            <ul className="nav navbar-nav navbar-right">
+              <li>
+                <Components.FacebookLogin/>
               </li>
             </ul>
           </div>
         </div>
-      </nav>)
+      </nav>);
   }
 });
