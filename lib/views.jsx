@@ -32,6 +32,20 @@ Views.NotFound = React.createClass({
   }
 });
 
+Views.SignIn = React.createClass({
+  render: function () {
+    return (
+      <Components.Container>
+        <div className="jumbotron">
+          <h1>Sinky Frog</h1>
+          <h2>Play the new addicting game with your friends.</h2>
+          <Components.FacebookLogin/>
+        </div>
+      </Components.Container>
+    );
+  }
+});
+
 Views.Home = React.createClass({
   render: function () {
     var currentUser = Meteor.user()

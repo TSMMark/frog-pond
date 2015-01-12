@@ -2,20 +2,7 @@ Partials = {};
 
 Partials.Navbar = React.createClass({
   render: function () {
-    var currentUser = Meteor.user()
-      , welcomeItem;
-
-    if (currentUser) {
-      welcomeItem = (
-        <li>
-          <a>
-            Hi, {currentUser.profile.name}.
-          </a>
-        </li>);
-    }
-    else {
-      welcomeItem = null;
-    }
+    var currentUser = Meteor.user();
 
     return (
       <nav className="navbar navbar-default navbar-fixed-top">
@@ -35,23 +22,31 @@ Partials.Navbar = React.createClass({
           </div>
 
           <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-            <ul className="nav navbar-nav navbar-left">
-              <li>
-                <Link to="app">
-                  Existing Matches
-                </Link>
-              </li>
-              <li>
-                <Link to="play">
-                  + New Match
-                </Link>
-              </li>
-            </ul>
+            {currentUser ?
+              <ul className="nav navbar-nav navbar-left">
+                <li>
+                  <Link to="app">
+                    Existing Matches
+                  </Link>
+                </li>
+                <li>
+                  <Link to="play">
+                    + New Match
+                  </Link>
+                </li>
+              </ul>
+            : null}
+            <form className="navbar-form navbar-right">
+              <Components.FacebookLogin currentUser={currentUser}/>
+            </form>
             <ul className="nav navbar-nav navbar-right">
-              {welcomeItem}
-              <li>
-                <Components.FacebookLogin currentUser={currentUser}/>
-              </li>
+              {currentUser ?
+                <li>
+                  <a>
+                    Hi, {currentUser.profile.name}.
+                  </a>
+                </li>
+              : null}
             </ul>
           </div>
         </div>

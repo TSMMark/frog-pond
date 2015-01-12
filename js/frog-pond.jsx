@@ -1,15 +1,31 @@
 if (Meteor.isClient) {
   Meteor.startup(function () {
-    var routes = (
-      <Route name="app" path="/" handler={Views.App}>
-        <Route name="play" handler={Views.NewGame}/>
-        <Route name="playMatch" path="play/:matchId" handler={Views.PlayMatch}/>
-        <DefaultRoute handler={Views.Home}/>
-      </Route>
-    );
-
     render = function () {
-      Meteor.subscribe("matches", Meteor.userId());
+      var currentUser = Meteor.user()
+        , subRoutes
+        , routes;
+
+        if (currentUser) {
+          subRoutes = [
+            (<Route name="play" handler={Views.NewGame}/>),
+            (<Route name="playMatch" path="play/:matchId" handler={Views.PlayMatch}/>),
+            (<DefaultRoute handler={Views.Home}/>)
+          ];
+        }
+        else {
+          subRoutes = <DefaultRoute handler={Views.SignIn}/>;
+        }
+
+        routes = (
+          <Route name="app" path="/" handler={Views.App}>
+            {subRoutes}
+          </Route>
+        );
+
+      if (currentUser) {
+        Meteor.subscribe("matches", currentUser._id);
+      }
+
       Meteor.subscribe("users");
 
       Router.run(routes, Router.HistoryLocation, function (Handler) {

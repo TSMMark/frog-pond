@@ -112,14 +112,17 @@ Components.FacebookLogin = React.createClass({
   render: function () {
     if (this.props.currentUser) {
       return (
-        <a onClick={this.signOut} href="#"
-           className="fa fa-power-off"></a>);
+        <button onClick={this.signOut}
+                className="btn btn-default">
+          <span className="fa fa-power-off"></span>
+        </button>);
     }
     else {
       return (
-        <a onClick={this.signIn} href="#">
-          Sign In
-        </a>);
+        <button onClick={this.signIn}
+           className="btn btn-facebook">
+          Sign in with Facebook
+        </button>);
     }
   },
 
