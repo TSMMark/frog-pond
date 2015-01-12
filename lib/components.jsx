@@ -110,14 +110,10 @@ Components.NewGameButton = React.createClass({
 
 Components.FacebookLogin = React.createClass({
   render: function () {
-    var user = Meteor.user();
-
-    if (user) {
-      var name = user.profile && user.profile.name;
+    if (this.props.currentUser) {
       return (
-        <a>
-          Signed in as {user.profile.name}
-        </a>);
+        <a onClick={this.signOut} href="#"
+           className="fa fa-power-off"></a>);
     }
     else {
       return (
@@ -127,13 +123,21 @@ Components.FacebookLogin = React.createClass({
     }
   },
 
-  signIn: function () {
+  signIn: function (event) {
+    event.preventDefault();
     Meteor.loginWithFacebook({
       requestPermissions: ['email']
     }, function (error) {
-      console.log("FacebookLogin", error);
+      Meteor._debug("FacebookLogin", error);
       if (error) throw error;
-      // render();
+    });
+  },
+
+  signOut: function (event) {
+    event.preventDefault();
+    Meteor.logout(function (error) {
+      Meteor._debug("Logout", error);
+      if (error) throw error;
     });
   }
 });

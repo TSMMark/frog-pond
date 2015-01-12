@@ -2,6 +2,21 @@ Partials = {};
 
 Partials.Navbar = React.createClass({
   render: function () {
+    var currentUser = Meteor.user()
+      , welcomeItem;
+
+    if (currentUser) {
+      welcomeItem = (
+        <li>
+          <a>
+            Hi, {currentUser.profile.name}.
+          </a>
+        </li>);
+    }
+    else {
+      welcomeItem = null;
+    }
+
     return (
       <nav className="navbar navbar-default navbar-fixed-top">
         <div className="container-fluid">
@@ -33,8 +48,9 @@ Partials.Navbar = React.createClass({
               </li>
             </ul>
             <ul className="nav navbar-nav navbar-right">
+              {welcomeItem}
               <li>
-                <Components.FacebookLogin/>
+                <Components.FacebookLogin currentUser={currentUser}/>
               </li>
             </ul>
           </div>
