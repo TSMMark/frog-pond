@@ -1,9 +1,22 @@
 Components = {};
 
 Components.BoardTile = React.createClass({
+  mixins: [HammerMixin],
+
   getInitialState: function () {
     return {
       hover: false
+    }
+  },
+
+  hammer: function () {
+    return {
+      self: {
+        recognizer: "pan",
+        set: {
+          direction: Hammer.DIRECTION_ALL
+        }
+      }
     }
   },
 
@@ -23,7 +36,8 @@ Components.BoardTile = React.createClass({
         });
 
     return (
-      <div className="game-lily-wrapper" style={wrapperStyle}>
+      <div ref="self" className="game-lily-wrapper"
+           style={wrapperStyle}>
         <div className={lilyClassSet}
              data-occupant-skin={occupantSkin}
              onMouseOver={this.onMouseOver}
@@ -31,6 +45,13 @@ Components.BoardTile = React.createClass({
           <div className="lily-occupant"></div>
         </div>
       </div>);
+  },
+
+  handlePan: function (event) {
+    if (event.isFinal) {
+      console.log("pan", event);
+      this.props.onPan(1, this.props.tile);
+    }
   },
 
   onMouseOver: function (_event) {
@@ -47,15 +68,12 @@ Components.BoardTile = React.createClass({
 });
 
 Components.GameBoard = React.createClass({
-  getMatch: function () {
-    return this.props.match;
-  },
-
   render: function () {
-    var match = this.getMatch()
+    var self = this
+      , match = self.props.match
       , totalArea = match.totalArea()
-      , boardWidth = window.innerWidth
-      , boardHeight = window.innerHeight
+      , boardWidth = self.props.width
+      , boardHeight = self.props.height
       , maxTileWidth = boardWidth / totalArea.width
       , maxTileHeight = boardHeight / totalArea.height
       , size = Math.min(maxTileWidth, maxTileHeight)
@@ -64,7 +82,8 @@ Components.GameBoard = React.createClass({
           marginTop: (size * totalArea.height / -2) + "px"
         }
       , gameTiles = match.tiles.map(function (tile) {
-          return <Components.BoardTile tile={tile} size={size} key={tile.props.key} />
+          return <Components.BoardTile tile={tile} size={size} key={tile.props.key}
+            onPan={self.onPanTile} />
         });
 
     return (
@@ -75,6 +94,18 @@ Components.GameBoard = React.createClass({
           </div>
         </div>
       </div>);
+  },
+
+  // directionCode - top 1, right 2, bottom 3, left 4
+  onPanTile: function (directionCode, pannedTile) {
+    if (directionCode == 1 || directionCode == 3) {
+      this.props.match.shiftCol(
+        pannedTile.props.x, 1);
+    }
+    else if (directionCode == 2 || directionCode == 4) {
+      this.props.match.shiftRow(
+        pannedTile.props.y, 1);
+    }
   }
 });
 

@@ -106,7 +106,9 @@ Views.PlayMatch = React.createClass({
 
   render: function () {
     var matchId = this.getParams().matchId
-      , match;
+      , match
+      , width
+      , height;
 
     try {
       match = Models.Match.findById(matchId);
@@ -114,9 +116,12 @@ Views.PlayMatch = React.createClass({
       return (<Views.NotFound/>);
     }
 
+    width = 640;
+    height = 640;
+
     return (
       <Components.Container>
-        <Components.GameBoard match={match}/>
+        <Components.GameBoard match={match} width={width} height={height}/>
       </Components.Container>);
   }
 });
