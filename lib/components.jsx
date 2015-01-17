@@ -32,7 +32,8 @@ Components.BoardTile = React.createClass({
       , lilyClassSet = React.addons.classSet({
           "lily-square": true,
           "with-occupant": !!this.props.tile.props.occupant,
-          hover: this.state.hover
+          hover: this.state.hover,
+          grab: this.state.grab
         });
 
     return (
@@ -41,25 +42,49 @@ Components.BoardTile = React.createClass({
         <div className={lilyClassSet}
              data-occupant-skin={occupantSkin}
              onMouseOver={this.onMouseOver}
-             onMouseOut={this.onMouseOut}>
+             onMouseOut={this.onMouseOut}
+             onMouseDown={this.onMouseDown}
+             onMouseUp={this.onMouseUp}>
           <div className="lily-occupant"></div>
         </div>
       </div>);
   },
 
   handlePan: function (event) {
+    var direction = this.parseHammerEventDirection(event.direction);
+
+    if (!direction) return;
+
     if (event.isFinal) {
-      console.log("pan", event);
-      this.props.onPan(1, this.props.tile);
+      console.log("pan", direction, event);
+      this.props.onPan(direction, this.props.tile);
+    }
+  },
+
+  parseHammerEventDirection: function (hammerDirection) {
+    switch (hammerDirection) {
+      case Hammer.DIRECTION_NONE:  return 0;
+      case Hammer.DIRECTION_UP:    return 1;
+      case Hammer.DIRECTION_RIGHT: return 2;
+      case Hammer.DIRECTION_DOWN:  return 3;
+      case Hammer.DIRECTION_LEFT:  return 4;
     }
   },
 
   onMouseOver: function (_event) {
-    this.setState({ hover: true })
+    this.setState({ hover: true });
   },
 
   onMouseOut: function (_event) {
-    this.setState({ hover: false })
+    this.setState({ hover: false, grab: false });
+  },
+
+  onMouseDown: function (_event) {
+    this.setState({ grab: true });
+  },
+
+  onMouseUp: function (_event) {
+    this.setState({ grab: false });
   },
 
   getCoordinates: function () {
@@ -96,16 +121,25 @@ Components.GameBoard = React.createClass({
       </div>);
   },
 
+  panDirectionFunctionMap: {
+    1: "shiftUp",
+    2: "shiftRight",
+    3: "shiftDown",
+    4: "shiftLeft"
+  },
+
   // directionCode - top 1, right 2, bottom 3, left 4
   onPanTile: function (directionCode, pannedTile) {
-    if (directionCode == 1 || directionCode == 3) {
-      this.props.match.shiftCol(
-        pannedTile.props.x, 1);
-    }
-    else if (directionCode == 2 || directionCode == 4) {
-      this.props.match.shiftRow(
-        pannedTile.props.y, 1);
-    }
+    var panFunction = this.panDirectionFunctionMap[directionCode];
+    this.props.match[panFunction](pannedTile);
+    // if (directionCode == 1 || directionCode == 3) {
+    //   this.props.match.shiftCol(
+    //     pannedTile.props.x, 1);
+    // }
+    // else if (directionCode == 2 || directionCode == 4) {
+    //   this.props.match.shiftRow(
+    //     pannedTile.props.y, 1);
+    // }
   }
 });
 
