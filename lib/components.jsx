@@ -128,18 +128,11 @@ Components.GameBoard = React.createClass({
     4: "shiftLeft"
   },
 
-  // directionCode - top 1, right 2, bottom 3, left 4
+  // @param directionCode [Integer] top 1, right 2, bottom 3, left 4
+  // @param pannedTile [Components.BoardTile]
   onPanTile: function (directionCode, pannedTile) {
     var panFunction = this.panDirectionFunctionMap[directionCode];
     this.props.match[panFunction](pannedTile);
-    // if (directionCode == 1 || directionCode == 3) {
-    //   this.props.match.shiftCol(
-    //     pannedTile.props.x, 1);
-    // }
-    // else if (directionCode == 2 || directionCode == 4) {
-    //   this.props.match.shiftRow(
-    //     pannedTile.props.y, 1);
-    // }
   }
 });
 
