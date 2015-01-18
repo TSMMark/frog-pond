@@ -37,6 +37,7 @@ Components.BoardTile = React.createClass({
       , lilyClassSet = cx({
           "lily-square": true,
           "with-occupant": !!occupant,
+          "moving-occupant": this.state.movingOccupant,
           hover: this.state.hover,
           grab: this.state.grab
         })
@@ -112,6 +113,10 @@ Components.BoardTile = React.createClass({
 });
 
 Components.GameBoard = React.createClass({
+  getInitialState: function () {
+    return {};
+  },
+
   render: function () {
     var self = this
       , match = self.props.match
@@ -164,6 +169,33 @@ Components.GameBoard = React.createClass({
   },
 
   handleTileClick: function (tileComponent) {
+    var tile = tileComponent.props.tile
+      , movingOccupantOf = this.state.movingOccupantOf;
+
+
+    if (this.state.movingOccupantOf) {
+      if (tile.isAdjacentTo(movingOccupantOf.props.tile)) {
+        tile.props.occupant = movingOccupantOf.props.tile.props.occupant;
+        delete(movingOccupantOf.props.tile.props.occupant);
+        this.props.match.save();
+      }
+      else {
+        this.setState({
+          movingOccupantOf: undefined
+        });
+        movingOccupantOf.setState({
+          movingOccupant: false
+        });
+      }
+    }
+    else if (tile.props.occupant) {
+      this.setState({
+        movingOccupantOf: tileComponent
+      });
+      tileComponent.setState({
+        movingOccupant: true
+      });
+    }
   }
 });
 
