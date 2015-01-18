@@ -77,14 +77,13 @@ Views.Home = React.createClass({
 
 Views.NewGame = React.createClass({
   listPlayers: function () {
-    // var currentUserId = "ir6ZRhzSNtdc8GNAS"
     var currentUser = Meteor.user()
-      , otherUsers = Collections.Users.find({_id: {$not: currentUser._id}});
+      , otherUsers = Collections.Users.find({ _id: { $not: currentUser._id } });
 
     return otherUsers.map(function (player) {
       return (
         <li key={player._id} className="list-group-item">
-          <Components.NewGameButton player={player} currentPlayer={currentUser}/>
+          <Components.NewGameButton player={player} currentPlayer={currentUser} />
         </li>);
     });
   },
@@ -113,8 +112,9 @@ Views.PlayMatch = React.createClass({
     try {
       match = Models.Match.findById(matchId);
     } catch (e) {
-      return (<Views.NotFound/>);
     }
+
+    if (!match) return (<Views.NotFound/>);
 
     width = 640;
     height = 640;

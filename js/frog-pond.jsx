@@ -1,9 +1,20 @@
 if (Meteor.isClient) {
   Meteor.startup(function () {
+    updateDeps = function () {
+      Collections.Users.find().fetch();
+      Collections.Matches.find().fetch();
+
+      Meteor.subscribe("matches");
+      Meteor.subscribe("users");
+    }
+
     render = function () {
       var currentUser = Meteor.user()
         , subRoutes
         , routes;
+
+        updateDeps();
+        console.log("Rendering!");
 
         if (currentUser) {
           subRoutes = [
@@ -22,27 +33,27 @@ if (Meteor.isClient) {
           </Route>
         );
 
-      if (currentUser) {
-        Meteor.subscribe("matches", currentUser._id);
-      }
-
-      Meteor.subscribe("users");
-
       Router.run(routes, Router.HistoryLocation, function (Handler) {
         React.render(<Handler/>,
                      document.getElementById("main-app"));
       });
     }
 
-    Deps.autorun(render);
+    updateDeps();
+    Tracker.autorun(render);
 
     $(window).resize(_.throttle(render, 600));
   });
 }
 
 if (Meteor.isServer) {
-  Meteor.publish("matches", function (userId) {
-    return Collections.Matches.find({"playersIds": userId});
+  Meteor.publish("matches", function () {
+    if (this.userId) {
+      return Collections.Matches.find({ "playersIds": this.userId });
+    }
+    else {
+      return [];
+    }
   });
 
   Meteor.publish("users", function () {

@@ -1,5 +1,10 @@
 Components = {};
 
+if (React.addons) {
+  ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
+  cx = React.addons.classSet;
+}
+
 Components.BoardTile = React.createClass({
   mixins: [HammerMixin],
 
@@ -29,7 +34,7 @@ Components.BoardTile = React.createClass({
           width: this.props.size + "px",
           height: this.props.size + "px"
         }
-      , lilyClassSet = React.addons.classSet({
+      , lilyClassSet = cx({
           "lily-square": true,
           "with-occupant": !!this.props.tile.props.occupant,
           hover: this.state.hover,
@@ -44,7 +49,8 @@ Components.BoardTile = React.createClass({
              onMouseOver={this.onMouseOver}
              onMouseOut={this.onMouseOut}
              onMouseDown={this.onMouseDown}
-             onMouseUp={this.onMouseUp}>
+             onMouseUp={this.onMouseUp}
+             onClick={this.onClick}>
           <div className="lily-occupant"></div>
         </div>
       </div>);
@@ -56,8 +62,7 @@ Components.BoardTile = React.createClass({
     if (!direction) return;
 
     if (event.isFinal) {
-      console.log("pan", direction, event);
-      this.props.onPan(direction, this.props.tile);
+      this.props.onPan(direction, this);
     }
   },
 
@@ -87,6 +92,14 @@ Components.BoardTile = React.createClass({
     this.setState({ grab: false });
   },
 
+  onClick: function (_event) {
+    this.sink();
+  },
+
+  sink: function () {
+    this.props.handleSink(this);
+  },
+
   getCoordinates: function () {
     return { x: this.props.tile.props.x, y: this.props.tile.props.y };
   }
@@ -107,15 +120,17 @@ Components.GameBoard = React.createClass({
           marginTop: (size * totalArea.height / -2) + "px"
         }
       , gameTiles = match.tiles.map(function (tile) {
-          return <Components.BoardTile tile={tile} size={size} key={tile.props.key}
-            onPan={self.onPanTile} />
+          return (<Components.BoardTile tile={tile} size={size} key={tile.props.key}
+            onPan={self.onPanTile} handleSink={self.removeTile} />);
         });
 
     return (
       <div className="game-board">
         <div className="game-perspective">
           <div className="game-tiles" style={style}>
-            {gameTiles}
+            <ReactCSSTransitionGroup transitionName="tile">
+              {gameTiles}
+            </ReactCSSTransitionGroup>
           </div>
         </div>
       </div>);
@@ -129,10 +144,14 @@ Components.GameBoard = React.createClass({
   },
 
   // @param directionCode [Integer] top 1, right 2, bottom 3, left 4
-  // @param pannedTile [Components.BoardTile]
-  onPanTile: function (directionCode, pannedTile) {
+  // @param tileComponent [Components.BoardTile]
+  onPanTile: function (directionCode, tileComponent) {
     var panFunction = this.panDirectionFunctionMap[directionCode];
-    this.props.match[panFunction](pannedTile);
+    this.props.match[panFunction](tileComponent.props.tile);
+  },
+
+  removeTile: function (tileComponent) {
+    this.props.match.removeTile(tileComponent.props.tile);
   }
 });
 
@@ -160,9 +179,10 @@ Components.NewGameButton = React.createClass({
       , matchId = Models.Match.create({
           players: [currentPlayer, this.props.player],
           currentPlayerId: currentPlayer._id,
-          dimensions: {x: 4, y: 4}
+          dimensions: { x: 4, y: 4 }
         });
-    this.transitionTo("playMatch", {matchId: matchId});
+
+    this.transitionTo("playMatch", { matchId: matchId });
   }
 });
 

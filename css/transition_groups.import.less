@@ -1,0 +1,17 @@
+.tile-enter {
+  opacity: 0.01;
+  .transition(opacity 1s ease-in-out);
+}
+
+.tile-enter.tile-enter-active {
+  opacity: 1;
+}
+
+.tile-leave {
+  opacity: 1;
+  .transition(opacity 1s ease-in-out);
+}
+
+.tile-leave.tile-leave-active {
+  opacity: 0.01;
+}
