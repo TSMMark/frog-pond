@@ -27,7 +27,7 @@ Components.BoardTile = React.createClass({
 
   render: function () {
     var coords = this.getCoordinates()
-      , occupantSkin = this.props.tile.props.occupant // TODO get skin from player's settings.
+      , occupant = this.props.occupant // TODO get skin from player's settings.
       , wrapperStyle = {
           left: (coords.x * this.props.size) + "px",
           top: (coords.y * this.props.size) + "px",
@@ -36,22 +36,28 @@ Components.BoardTile = React.createClass({
         }
       , lilyClassSet = cx({
           "lily-square": true,
-          "with-occupant": !!this.props.tile.props.occupant,
+          "with-occupant": !!occupant,
           hover: this.state.hover,
           grab: this.state.grab
-        });
+        })
+      , occupantComponent;
+
+    if (occupant) {
+      occupantComponent = (
+        <div className="lily-occupant">{occupant.profile.name}</div>);
+    }
 
     return (
       <div ref="self" className="game-lily-wrapper"
            style={wrapperStyle}>
         <div className={lilyClassSet}
-             data-occupant-skin={occupantSkin}
+             data-occupant-skin={occupant && occupant._id}
              onMouseOver={this.onMouseOver}
              onMouseOut={this.onMouseOut}
              onMouseDown={this.onMouseDown}
              onMouseUp={this.onMouseUp}
              onClick={this.onClick}>
-          <div className="lily-occupant"></div>
+          {occupantComponent}
         </div>
       </div>);
   },
@@ -120,9 +126,11 @@ Components.GameBoard = React.createClass({
           marginTop: (size * totalArea.height / -2) + "px"
         }
       , gameTiles = match.tiles.map(function (tile) {
+          var occupant = Collections.Users.findOne(tile.props.occupant);
           return (<Components.BoardTile tile={tile} size={size} key={tile.props.key}
             onPan={self.onPanTile} handleSink={self.removeTile}
-            handleClick={self.handleTileClick} />);
+            handleClick={self.handleTileClick}
+            occupant={occupant} />);
         });
 
     return (
