@@ -93,7 +93,7 @@ Components.BoardTile = React.createClass({
   },
 
   onClick: function (_event) {
-    this.sink();
+    this.props.handleClick(this);
   },
 
   sink: function () {
@@ -121,7 +121,8 @@ Components.GameBoard = React.createClass({
         }
       , gameTiles = match.tiles.map(function (tile) {
           return (<Components.BoardTile tile={tile} size={size} key={tile.props.key}
-            onPan={self.onPanTile} handleSink={self.removeTile} />);
+            onPan={self.onPanTile} handleSink={self.removeTile}
+            handleClick={self.handleTileClick} />);
         });
 
     return (
@@ -152,6 +153,9 @@ Components.GameBoard = React.createClass({
 
   removeTile: function (tileComponent) {
     this.props.match.removeTile(tileComponent.props.tile);
+  },
+
+  handleTileClick: function (tileComponent) {
   }
 });
 
