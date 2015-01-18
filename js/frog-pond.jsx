@@ -1,3 +1,10 @@
+missingServiceConfig = function () {
+  var serviceConfig = ServiceConfiguration.configurations.findOne({
+    service: "facebook"
+  });
+  return !serviceConfig;
+}
+
 if (Meteor.isClient) {
   Meteor.startup(function () {
     updateDeps = function () {
@@ -23,8 +30,11 @@ if (Meteor.isClient) {
             (<DefaultRoute key="default" handler={Views.Home}/>)
           ];
         }
+        else if (missingServiceConfig()) {
+          subRoutes = (<DefaultRoute key="default" handler={Views.ConfigureServices}/>);
+        }
         else {
-          subRoutes = <DefaultRoute key="default" handler={Views.SignIn}/>;
+          subRoutes = (<DefaultRoute key="default" handler={Views.SignIn}/>);
         }
 
         routes = (
@@ -59,4 +69,11 @@ if (Meteor.isServer) {
   Meteor.publish("users", function () {
     return Collections.Users.find();
   });
+
+  Meteor.methods({
+    removeAllUserMatches: function () {
+      Collections.Matches.remove({ "playersIds": this.userId });
+    }
+  });
+
 }

@@ -70,8 +70,19 @@ Views.Home = React.createClass({
         <h2>Waiting on {countMatchesUnready} opponents.</h2>
         <Components.ExistingMatchesList currentUser={currentUser}
           matches={matchesUnready}/>
+        <button className="btn btn-danger btn-sm"
+                onClick={this.clearAllMatches}>
+          Clear all games
+        </button>
       </Components.Container>
     );
+  },
+
+  clearAllMatches: function () {
+    var msg = "Really clear all your matches? Can't undo.";
+    if (confirm(msg)) {
+      Meteor.call("removeAllUserMatches");
+    }
   }
 });
 
@@ -116,12 +127,42 @@ Views.PlayMatch = React.createClass({
 
     if (!match) return (<Views.NotFound/>);
 
-    width = 640;
-    height = 640;
+    width = window.innerWidth - 24;
+    height = window.innerHeight - 64;
 
     return (
       <Components.Container>
         <Components.GameBoard match={match} width={width} height={height}/>
       </Components.Container>);
+  }
+});
+
+Views.ConfigureServices = React.createClass({
+  mixins: [Router.State, Router.Navigation],
+
+  render: function () {
+    return (
+      <Components.Container>
+        <form onSubmit={this.handleSubmit}>
+          <p>Enter the Facebook app data:</p>
+          <label htmlFor="app_id">app_id</label>
+          <input type="text" ref="app_id" id="app_id" name="app_id" />
+          <label htmlFor="app_secret">app_secret</label>
+          <input type="text" ref="app_secret" id="app_secret" name="app_secret" />
+          <input type="submit" className="btn btn-default" />
+        </form>
+      </Components.Container>);
+  },
+
+  handleSubmit: function (event) {
+    event.preventDefault();
+    var app_id = this.refs.app_id.getDOMNode().value
+      , app_secret = this.refs.app_secret.getDOMNode().value
+
+    ServiceConfiguration.configurations.insert({
+      service: "facebook",
+      appId: app_id,
+      secret: app_secret
+    });
   }
 });

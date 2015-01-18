@@ -168,13 +168,15 @@ Components.GameBoard = React.createClass({
     this.props.match.removeTile(tileComponent.props.tile);
   },
 
+  // TODO: Move most of this logic to the model.
   handleTileClick: function (tileComponent) {
     var tile = tileComponent.props.tile
       , movingOccupantOf = this.state.movingOccupantOf;
 
 
     if (this.state.movingOccupantOf) {
-      if (tile.isAdjacentTo(movingOccupantOf.props.tile)) {
+      if (!tile.props.occupant &&
+          tile.isAdjacentTo(movingOccupantOf.props.tile)) {
         tile.props.occupant = movingOccupantOf.props.tile.props.occupant;
         delete(movingOccupantOf.props.tile.props.occupant);
         this.props.match.save();
